@@ -1,0 +1,11 @@
+{
+  "name": "ponte-usdc-arc",
+  "version": "1.0.0",
+  "description": "Ponte de USDC entre Arc Testnet e outras redes usando o Bridge Kit da Circle (CCTP V2)",
+  "type": "module",
+  "scripts": {
+    "listar-redes": "node 1-listar-redes.js",
+    "bridge": "node 2-estimar-e-fazer-bridge.js"
+  },
+  "license": "MIT"
+}
