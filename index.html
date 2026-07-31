@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CreatorPay — Global Creator Payments via USDC</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
+
+  :root {
+    --bg:       #0B0F1A;
+    --surface:  #131929;
+    --card:     #1A2236;
+    --border:   #243050;
+    --accent:   #2D6FFF;
+    --accent2:  #00D4AA;
+    --text:     #E8EDF8;
+    --muted:    #7A8BAD;
+    --success:  #00D4AA;
+    --warning:  #F5A623;
+    --danger:   #FF4D6D;
+    --radius:   12px;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body:    'Inter', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(11,15,26,0.92);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent2);
+    box-shadow: 0 0 8px var(--accent2);
+  }
+
+  .logo span { color: var(--accent2); }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .badge {
+    background: rgba(45,111,255,0.15);
+    color: #7EB3FF;
+    border: 1px solid rgba(45,111,255,0.3);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .badge.green {
+    background: rgba(0,212,170,0.12);
+    color: var(--accent2);
+    border-color: rgba(0,212,170,0.3);
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    padding: 24px 32px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    user-select: none;
+  }
+
+  .tab.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* ── Layout ── */
+  .main { max-width: 1000px; margin: 0 auto; padding: 36px 24px 80px; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Section title ── */
+  .section-header { margin-bottom: 24px; }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .section-sub { color: var(--muted); font-size: 14px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 16px;
+  }
+
+  /* ── Form ── */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  input, select, textarea {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+  }
+
+  input::placeholder, textarea::placeholder { color: var(--muted); }
+
+  select option { background: var(--card); }
+
+  /* ── Network selector ── */
+  .network-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .network-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    font-family: var(--font-body);
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+  }
+
+  .network-btn.selected {
+    border-color: var(--accent);
+    color: var(--text);
+    background: rgba(45,111,255,0.1);
+  }
+
+  .network-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Estimate box ── */
+  .estimate-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .estimate-item { display: flex; flex-direction: column; gap: 4px; }
+  .estimate-label { font-size: 12px; color: var(--muted); }
+  .estimate-value { font-size: 16px; font-weight: 600; font-family: var(--font-display); }
+  .estimate-value.green { color: var(--success); }
+  .estimate-value.blue  { color: #7EB3FF; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: var(--font-body);
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    width: 100%;
+    margin-top: 20px;
+    font-size: 15px;
+    padding: 14px;
+  }
+
+  .btn-primary:hover:not(:disabled) { opacity: 0.88; }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .btn-outline:hover { border-color: var(--accent); }
+
+  /* ── Progress steps ── */
+  .steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 28px;
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .step.active { color: var(--text); }
+  .step.done { color: var(--success); }
+
+  .step-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .step.active .step-num {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .step.done .step-num {
+    background: var(--success);
+    border-color: var(--success);
+    color: #0B0F1A;
+  }
+
+  .step-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    margin: 0 8px;
+  }
+
+  /* ── Status modal ── */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+  }
+
+  .modal-icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin: 0 auto 16px;
+  }
+
+  .modal-icon.pending { background: rgba(245,166,35,0.15); }
+  .modal-icon.success { background: rgba(0,212,170,0.15); }
+
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .modal-sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+
+  .tx-hash {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: monospace;
+    word-break: break-all;
+    text-align: left;
+    margin-bottom: 16px;
+  }
+
+  .tx-link {
+    color: #7EB3FF;
+    font-size: 13px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 20px;
+  }
+
+  .tx-link:hover { text-decoration: underline; }
+
+  /* ── Creator dashboard ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+  }
+
+  .stat-value.green { color: var(--success); }
+  .stat-value.blue  { color: #7EB3FF; }
+
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* ── Transaction list ── */
+  .tx-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .tx-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    transition: border-color 0.2s;
+  }
+
+  .tx-row:hover { border-color: rgba(45,111,255,0.4); }
+
+  .tx-left { display: flex; align-items: center; gap: 14px; }
+
+  .tx-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(0,212,170,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .tx-info { display: flex; flex-direction: column; gap: 2px; }
+  .tx-from { font-size: 14px; font-weight: 500; }
+  .tx-date { font-size: 12px; color: var(--muted); }
+
+  .tx-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .tx-amount { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--success); }
+  .tx-status { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .tx-status.confirmed { background: rgba(0,212,170,0.12); color: var(--success); }
+  .tx-status.pending   { background: rgba(245,166,35,0.12); color: var(--warning); }
+
+  /* ── Network pill ── */
+  .net-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 8px;
+  }
+
+  /* ── Address display ── */
+  .address-display {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .address-text { font-family: monospace; font-size: 13px; color: var(--muted); }
+
+  .copy-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s;
+    font-family: var(--font-body);
+  }
+
+  .copy-btn:hover { background: var(--border); color: var(--text); }
+
+  /* ── Spinner ── */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--card);
+    border: 1px solid var(--success);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 14px;
+    color: var(--success);
+    z-index: 300;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── Footer note ── */
+  .footer-note {
+    margin-top: 40px;
+    padding: 16px 20px;
+    background: rgba(45,111,255,0.06);
+    border: 1px solid rgba(45,111,255,0.2);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .footer-note strong { color: #7EB3FF; }
+
+  /* ── Pulse dot ── */
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulse 1.8s ease-in-out infinite;
+    display: inline-block;
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 14px 16px; }
+    .tabs  { padding: 16px 16px 0; }
+    .main  { padding: 24px 16px 60px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: 1fr; }
+    .network-grid { grid-template-columns: 1fr 1fr; }
+    .estimate-box { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Creator<span>Pay</span>
+  </div>
+  <div class="header-meta">
+    <span class="live-dot"></span>
+    <span>Arc Testnet</span>
+    <span class="badge green">USDC</span>
+    <span class="badge">CCTP V2</span>
+  </div>
+</header>
+
+<!-- ── TABS ── -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('payer')">💳 Payer (Brand)</div>
+  <div class="tab" onclick="switchTab('creator')">🎨 Creator Dashboard</div>
+</div>
+
+<!-- ── MAIN ── -->
+<div class="main">
+
+  <!-- ════ PAYER PANEL ════ -->
+  <div class="panel active" id="panel-payer">
+
+    <div class="section-header">
+      <div class="section-title">Send payment to a creator</div>
+      <div class="section-sub">Funds settle instantly on-chain via USDC — no banks, no FX, no delays.</div>
+    </div>
+
+    <!-- Steps -->
+    <div class="steps">
+      <div class="step done" id="step1">
+        <div class="step-num" id="step1-num">✓</div>
+        <span>Connect</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step active" id="step2">
+        <div class="step-num" id="step2-num">2</div>
+        <span>Configure</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" id="step3">
+        <div class="step-num" id="step3-num">3</div>
+        <span>Review</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" id="step4">
+        <div class="step-num" id="step4-num">4</div>
+        <span>Confirm</span>
+      </div>
+    </div>
+
+    <!-- Form card -->
+    <div class="card">
+      <div class="card-title">Payment details</div>
+      <div class="form-grid">
+
+        <div class="form-group full">
+          <label>Creator wallet address (destination)</label>
+          <input type="text" id="dest-address" placeholder="0x... or ENS name" />
+        </div>
+
+        <div class="form-group">
+          <label>Amount (USDC)</label>
+          <input type="number" id="amount" placeholder="100" min="1" step="1" value="10"/>
+        </div>
+
+        <div class="form-group">
+          <label>Memo / campaign tag</label>
+          <input type="text" id="memo" placeholder="e.g. June Reel promotion"/>
+        </div>
+
+        <div class="form-group full">
+          <label>Creator's destination network</label>
+          <div class="network-grid" id="network-grid">
+            <button class="network-btn selected" onclick="selectNet(this,'Base_Sepolia','#0052FF')">
+              <span class="network-dot" style="background:#0052FF"></span> Base Sepolia
+            </button>
+            <button class="network-btn" onclick="selectNet(this,'Ethereum_Sepolia','#627EEA')">
+              <span class="network-dot" style="background:#627EEA"></span> Ethereum Sepolia
+            </button>
+            <button class="network-btn" onclick="selectNet(this,'Arbitrum_Sepolia','#28A0F0')">
+              <span class="network-dot" style="background:#28A0F0"></span> Arbitrum Sepolia
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Estimate -->
+      <div class="estimate-box">
+        <div class="estimate-item">
+          <div class="estimate-label">You send</div>
+          <div class="estimate-value blue" id="est-send">10 USDC</div>
+        </div>
+        <div class="estimate-item">
+          <div class="estimate-label">Network fee (est.)</div>
+          <div class="estimate-value" id="est-fee">~$0.01</div>
+        </div>
+        <div class="estimate-item">
+          <div class="estimate-label">Creator receives</div>
+          <div class="estimate-value green" id="est-recv">10 USDC</div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="send-btn" onclick="startBridge()">
+        Send via Arc + CCTP
+      </button>
+    </div>
+
+    <div class="footer-note">
+      <strong>How it works:</strong> USDC is burned on Arc Testnet via CCTP V2, attested by Circle, and minted on the destination network — all within seconds. No intermediaries. Source code: <strong>github.com/your-username/creatorpay</strong>
+    </div>
+  </div>
+
+  <!-- ════ CREATOR PANEL ════ -->
+  <div class="panel" id="panel-creator">
+
+    <div class="section-header">
+      <div class="section-title">Your payment dashboard</div>
+      <div class="section-sub">Track every USDC payment you've received, with on-chain proof for each one.</div>
+    </div>
+
+    <!-- Wallet display -->
+    <div class="address-display">
+      <span class="address-text" id="creator-addr">0xa88d4E5CCe282dC2702b1A8f911CF26b6220FB7E</span>
+      <button class="copy-btn" onclick="copyAddr()">Copy</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total received</div>
+        <div class="stat-value green" id="total-recv">42 USDC</div>
+        <div class="stat-sub">All time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Payments</div>
+        <div class="stat-value blue" id="total-txs">7</div>
+        <div class="stat-sub">Transactions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Networks used</div>
+        <div class="stat-value" id="total-nets">2</div>
+        <div class="stat-sub">Base, Ethereum</div>
+      </div>
+    </div>
+
+    <!-- Transaction list -->
+    <div class="card">
+      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Recent payments</span>
+        <span class="net-pill"><span class="live-dot" style="width:5px;height:5px"></span> Live</span>
+      </div>
+      <div class="tx-list" id="tx-list">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <div class="footer-note">
+      <strong>All payments are on-chain.</strong> Each transaction is verifiable on <strong>testnet.arcscan.app</strong> (source) and the destination network explorer. No bank account needed — just your wallet.
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ── BRIDGE STATUS MODAL ── -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="modal-icon pending" id="modal-icon">⏳</div>
+    <div class="modal-title" id="modal-title">Processing bridge…</div>
+    <div class="modal-sub" id="modal-sub">Please wait while your USDC is being transferred via CCTP V2</div>
+    <div class="tx-hash" id="modal-hash" style="display:none"></div>
+    <a class="tx-link" id="modal-link" href="#" target="_blank" style="display:none">
+      View on Arc explorer ↗
+    </a>
+    <button class="btn btn-outline" id="modal-close-btn" onclick="closeModal()" style="display:none;width:100%">Close</button>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast">✓ Address copied</div>
+
+<script>
+  /* ── Tab switcher ── */
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['payer','creator'][i] === tab));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + tab).classList.add('active');
+  }
+
+  /* ── Network selector ── */
+  let selectedNet = 'Base_Sepolia';
+  function selectNet(btn, net) {
+    document.querySelectorAll('.network-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedNet = net;
+  }
+
+  /* ── Estimate update ── */
+  document.getElementById('amount').addEventListener('input', function() {
+    const v = parseFloat(this.value) || 0;
+    document.getElementById('est-send').textContent = v + ' USDC';
+    document.getElementById('est-recv').textContent = v + ' USDC';
+  });
+
+  /* ── Bridge simulation ── */
+  async function startBridge() {
+    const addr   = document.getElementById('dest-address').value.trim();
+    const amount = document.getElementById('amount').value;
+
+    if (!addr) {
+      document.getElementById('dest-address').focus();
+      document.getElementById('dest-address').style.borderColor = 'var(--danger)';
+      setTimeout(() => document.getElementById('dest-address').style.borderColor = '', 2000);
+      return;
+    }
+
+    openModal('pending', 'Approving USDC spend…', 'Step 1/3 — Waiting for wallet signature');
+
+    await sleep(1800);
+    updateModal('pending', 'Burning USDC on Arc…', 'Step 2/3 — CCTP V2 burn transaction submitted');
+
+    await sleep(2200);
+    updateModal('pending', 'Waiting for attestation…', 'Step 3/3 — Circle is attesting the burn proof');
+
+    await sleep(2500);
+
+    const fakeTx = '0x' + [...Array(64)].map(() => Math.floor(Math.random()*16).toString(16)).join('');
+    document.getElementById('modal-hash').style.display = 'block';
+    document.getElementById('modal-hash').textContent = 'Tx: ' + fakeTx;
+    document.getElementById('modal-link').style.display = 'flex';
+    document.getElementById('modal-link').href = 'https://testnet.arcscan.app/tx/' + fakeTx;
+
+    updateModal('success', 'Bridge complete! ✓', amount + ' USDC delivered to creator on ' + selectedNet.replace('_',' '));
+    document.getElementById('modal-icon').className = 'modal-icon success';
+    document.getElementById('modal-close-btn').style.display = 'block';
+
+    addTxToCreator(addr, amount, selectedNet, fakeTx);
+  }
+
+  function openModal(type, title, sub) {
+    document.getElementById('modal-icon').className = 'modal-icon ' + type;
+    document.getElementById('modal-icon').textContent = type === 'pending' ? '⏳' : '✅';
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-sub').textContent   = sub;
+    document.getElementById('modal-hash').style.display = 'none';
+    document.getElementById('modal-link').style.display = 'none';
+    document.getElementById('modal-close-btn').style.display = 'none';
+    document.getElementById('modal').classList.add('open');
+  }
+
+  function updateModal(type, title, sub) {
+    document.getElementById('modal-icon').textContent = type === 'pending' ? '⏳' : '✅';
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-sub').textContent   = sub;
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  /* ── Creator dashboard ── */
+  const mockTxs = [
+    { from:'Brand UAE (0xAb3…f7E)', amount:'15 USDC', date:'Today, 14:32', net:'Base Sepolia',     status:'confirmed', hash:'0xabc123' },
+    { from:'AgencyDXB (0x9Fc…2aB)', amount:'10 USDC', date:'Today, 09:15', net:'Base Sepolia',     status:'confirmed', hash:'0xdef456' },
+    { from:'MediaHouse (0x3Dd…88C)', amount:'8 USDC',  date:'Yesterday',   net:'Eth Sepolia', status:'confirmed', hash:'0xghi789' },
+    { from:'StartupAE (0x1Ee…44F)',  amount:'5 USDC',  date:'Jul 21',      net:'Base Sepolia',     status:'confirmed', hash:'0xjkl012' },
+    { from:'InfluMgmt (0x7Aa…55D)',  amount:'4 USDC',  date:'Jul 20',      net:'Base Sepolia',     status:'confirmed', hash:'0xmno345' },
+  ];
+
+  function renderTxList(txs) {
+    const list = document.getElementById('tx-list');
+    list.innerHTML = txs.map(tx => `
+      <div class="tx-row">
+        <div class="tx-left">
+          <div class="tx-icon">💵</div>
+          <div class="tx-info">
+            <div class="tx-from">${tx.from}</div>
+            <div class="tx-date">${tx.date} &nbsp;<span class="net-pill">${tx.net}</span></div>
+          </div>
+        </div>
+        <div class="tx-right">
+          <div class="tx-amount">+${tx.amount}</div>
+          <span class="tx-status ${tx.status}">${tx.status}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  renderTxList(mockTxs);
+
+  function addTxToCreator(addr, amount, net, hash) {
+    const short = addr.length > 10 ? addr.slice(0,6)+'…'+addr.slice(-4) : addr;
+    mockTxs.unshift({
+      from: 'New payment (' + short + ')',
+      amount: amount + ' USDC',
+      date: 'Just now',
+      net: net.replace('_',' '),
+      status: 'confirmed',
+      hash
+    });
+    renderTxList(mockTxs);
+
+    const total = mockTxs.reduce((s, t) => s + parseFloat(t.amount), 0);
+    document.getElementById('total-recv').textContent = total.toFixed(0) + ' USDC';
+    document.getElementById('total-txs').textContent  = mockTxs.length;
+  }
+
+  /* ── Copy address ── */
+  function copyAddr() {
+    const addr = document.getElementById('creator-addr').textContent;
+    navigator.clipboard.writeText(addr).catch(() => {});
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+</script>
+</body>
+</html>
